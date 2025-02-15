@@ -1,6 +1,7 @@
 from brainflow.board_shim import BoardShim, BrainFlowInputParams, BoardIds
-# from brainflow.data_filter import DataFilter, FilterTypes
+from brainflow.data_filter import DataFilter, FilterTypes
 import time
+import numpy as np
 
 # https://brainflow.readthedocs.io/en/stable/UserAPI.html#python-api-reference
 board_id=BoardIds.CYTON_DAISY_BOARD.value #2 #CYTON_DAISY_BOARD
@@ -10,17 +11,20 @@ params.serial_port = '/dev/cu.usbserial-DP05IK99'
 board=BoardShim(board_id, params)
 board.prepare_session()
 board.start_stream()
-# time.sleep(5)
-# data=board.get_board_data()
 
-# for i in range(1000):
+SAMPLING_RATE=125 #print("Sampling rate", BoardShim.get_sampling_rate(board_id))
 
-# About brainflow data as microvolts
-
+# for i in range(30):
 while True:
     time.sleep(0.1)
-    current_data=board.get_current_board_data(25)
-    print(current_data)
+    current_data=board.get_current_board_data(SAMPLING_RATE) #does not remove from ring buffer. 256 samples
+    eeg_channels=BoardShim.get_eeg_channels(board_id)
+    for channel in eeg_channels:
+        # DataFilter.perform_bandpass(current_data[channel], BoardShim.get_sampling_rate(board_id), 15.0, 50.0, 4, 'butterworth', 0)
+        print(f"Channel {channel} is {np.mean(current_data[channel])}")
+
+    # ML applications go here
+
 
 board.stop_stream()
 board.release_session()
