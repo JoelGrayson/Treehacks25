@@ -99,6 +99,7 @@
 
         // Create 16 charts
         const chartsContainer = document.getElementById('chartsContainer');
+        let charts=[];
 
         for (let i = 0; i < 16; i++) {
             const chartWrapper = document.createElement('div');
@@ -110,7 +111,7 @@
 
             const ctx = canvas.getContext('2d');
             
-            new Chart(ctx, {
+            chart=new Chart(ctx, {
                 type: 'line',
                 data: {
                     labels: labels,
@@ -139,6 +140,7 @@
                     }
                 }
             });
+            charts.push(chart);
         }
         
         
@@ -167,25 +169,28 @@
         //     `;
         // }
         
-        // const ws=new WebSocket('ws://127.0.0.1:5000/websocket');
-        // ws.onopen=()=>console.log('Connected to server');
-        // ws.onmessage=(event)=>{
-        //     const got=JSON.parse(event.data);
-        //     console.log(got);
-        //     const { type, data }=got;
-        //     if (type==='audio') {
-        //         // TODO: play audio at URL data (passed in from Hume)
-        //     }
-        //     if (type==='char') {
-        //         // TODO: add character to the display
-        //     }
-        //     if (type==='byte') {
-        //         // TODO: add a byte
-        //     }
-        //     if (type==='eeg') {
-        //         chart
-        //     }
-        // };
+        const ws=new WebSocket('ws://127.0.0.1:5000/websocket');
+        ws.onopen=()=>console.log('Connected to server');
+        ws.onmessage=(event)=>{
+            const got=JSON.parse(event.data);
+            console.log(got);
+            const { type, data }=got;
+            if (type==='audio') {
+                // TODO: play audio at URL data (passed in from Hume)
+            }
+            if (type==='char') {
+                // TODO: add character to the display
+            }
+            if (type==='byte') {
+                // TODO: add a byte
+            }
+            if (type==='eeg') {
+                for (let i=0; i<16; i++) {
+                    charts[i].data.datasets[0].data.shift();
+                    charts[i].data.datasets[0].data.push(data[i]);
+                }
+            }
+        };
     </script>
 </body>
 </html>

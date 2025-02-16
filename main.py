@@ -13,16 +13,27 @@ params=BrainFlowInputParams()
 params.serial_port='/dev/cu.usbserial-DP05IK99'
 
 
+def run(ws):
+    # https://brainflow.readthedocs.io/en/stable/UserAPI.html#python-api-reference
+    board_id = BoardIds.CYTON_DAISY_BOARD.value  # 2 #CYTON_DAISY_BOARD
+    params = BrainFlowInputParams()
+    params.serial_port = "/dev/cu.usbserial-DP05IK99"
 
-try:
     board = BoardShim(board_id, params)
     print("PRE")
     board.prepare_session()
     print("Successfully connected")
     board.start_stream()
-    print("Getting board data")
-    time.sleep(3)
-    data=board.get_board_data()
+
+    eeg_channels = BoardShim.get_eeg_channels(board_id)
+    accel_channels = BoardShim.get_accel_channels(board_id)
+    sampling_rate = board.get_sampling_rate(board_id)
+
+    for i in range(3):
+        time.sleep(1)
+        data = board.get_board_data()
+    time.sleep(1)
+    baseline = board.get_board_data()
     pre = -1
     while (True):
         time.sleep(1)
@@ -73,9 +84,7 @@ try:
 
     board.stop_stream()
     board.release_session()
-except Exception as e:
-    print("Problem", e)
-print("Prepared")
+
 
 '''SAMPLING_RATE=125 #print("Sampling rate", BoardShim.get_sampling_rate(board_id))
 
