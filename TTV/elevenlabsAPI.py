@@ -1,8 +1,11 @@
 import requests
 import json
-
-API_KEY = "sk_c34bd4413c06f97126b3de337952c1391bfc96774d8e66c0"
-VOICE_ID = "iP95p4xoKVk53GoZ742B"
+from dotenv import load_dotenv
+import os
+load_dotenv()
+VOICE_ID=os.getenv('VOICE_ID')
+API_KEY=os.getenv('API_KEY')
+LUMA_API_KEY=os.getenv('LUMA_API_KEY')
 
 def map_alpha_to_speech(alpha_value):
     """

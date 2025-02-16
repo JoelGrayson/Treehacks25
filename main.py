@@ -112,7 +112,7 @@ def run(ws):
                 bit = BrainBit.RIGHT_CLENCH
 
             print("sending", bit.value)
-            ws.send(json.dumps({"type": "bit", "data": {
+            ws.send(json.dumps({"type": "cycle", "data": {
                 "bit": bit.value,
                 "greeks": asdict(greeks),
                 # "data": (data.mean()-baseline_data.mean()).tolist()
