@@ -1,10 +1,8 @@
 import requests
 import json
 
-API_KEY = "your-elevenlabs-api-key"
-
-# ElevenLabs Voice Settings
-VOICE_ID = "your-voice-id"
+API_KEY = "elevenlabs-api-key"
+VOICE_ID = "elevenlabs-voice-id"
 
 def map_alpha_to_speech(alpha_value):
     """
@@ -22,7 +20,7 @@ def map_alpha_to_speech(alpha_value):
             "similarity_boost": 0.5,
             "text_modifier": lambda text: text  
         }
-    else:  # Excited state
+    else:
         return {
             "stability": 0.3,  
             "similarity_boost": 0.8,
