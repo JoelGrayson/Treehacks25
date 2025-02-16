@@ -23,6 +23,7 @@ try:
     print("Getting board data")
     time.sleep(3)
     data=board.get_board_data()
+    pre = -1
     while (True):
         time.sleep(1)
         data = board.get_board_data()
@@ -30,21 +31,36 @@ try:
         accel_channels = BoardShim.get_accel_channels(board_id)
         sampling_rate=board.get_sampling_rate(board_id)
 
+        band_powers = DataFilter.get_avg_band_powers(data, [channel for channel in eeg_channels], sampling_rate, True)
+        delta, theta, alpha, beta, gamma = band_powers[0][0], band_powers[0][1], band_powers[0][2], band_powers[0][3], band_powers[0][4]
+        arousal = beta + gamma
+        print("Arousal:", arousal)
+
+
         arr_left = data[eeg_channels[1]]
-        
-        #mid = arr[int(0.25 * len(arr)):int(0.75 * len(arr))]
-        #range_mid = np.ptp(mid)
         range_left = np.ptp(arr_left)
 
         arr_right = data[eeg_channels[9]]
         range_right = np.ptp(arr_right)
-        
-        if range_left < 200 and range_right < 200:
+
+        arr_accel = data[accel_channels[2]]
+        range_accel = np.ptp(arr_accel)
+
+
+        if range_accel > 0.14 and pre != 2:
+            print("2")
+            pre = 2
+        elif pre == 2 or (range_left < 200 and range_right < 200):
             print("baseline")
+            pre = -1
         elif range_left > range_right:
             print("0")
+            pre = 0
         elif range_right > range_left:
             print("1")
+            pre = 1
+
+
         '''
         accel = data[accel_channels[2]]
         range_accel = np.ptp(accel)
@@ -55,6 +71,7 @@ try:
         else:
             print("baseline")'''
         
+
     np.savetxt('data.csv', arr, delimiter=",")
     board.stop_stream()
     board.release_session()
