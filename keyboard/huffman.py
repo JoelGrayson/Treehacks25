@@ -7,8 +7,43 @@ from pathlib import Path
 from collections import deque
 import json
 import plotly.graph_objects as go
+from treelib import Tree  # Add to imports at top
 
-K = 26
+K = 27
+
+# https://norvig.com/mayzner.html
+# https://www.cs.umd.edu/content/punctuation-input-touchscreen-keyboards-analyzing-frequency-use-and-costs
+LETTER_FREQUENCIES = {
+    "e": 11.58,
+    "a": 7.52,
+    "o": 7.07,
+    "t": 8.57,
+    "i": 7.08,
+    "n": 6.74,
+    "s": 6.15,
+    "h": 4.71,
+    "l": 3.82,
+    "r": 5.86,
+    "m": 2.38,
+    "d": 3.55,
+    "u": 2.55,
+    "y": 1.55,
+    "g": 1.75,
+    "c": 3.13,
+    "k": 0.52,
+    "w": 1.55,
+    "b": 1.40,
+    "p": 2.00,
+    "f": 2.23,
+    "v": 0.99,
+    "j": 0.16,
+    "z": 0.09,
+    "x": 0.22,
+    "q": 0.11,
+    ">": 1.151,  # Enter
+    # ",": 2.3,  # Override
+    # "?": 0.032,
+}
 
 
 @dataclass
@@ -86,30 +121,39 @@ def build_prefix_code(
     """Assign Huffman codes and serialize tree in a single BFS traversal.
 
     Returns:
-        tuple[HuffmanNode, str]: Root node and JSON string containing tree and codes
+        dict: Contains 'codes' mapping and serialized 'tree' structure
     """
-    print("\nHuffman Codes (sorted by frequency):")
     total_freq = sum(char_freq.values())
 
-    # Build codes and code map in single BFS
+    # Build codes and tree visualization in single BFS
     code_map = {}
-    queue = deque([(root, "")])
+    tree = Tree()
+    tree.create_node("ROOT", "root", data=f"{root.freq:.1f}")
+
+    queue = deque([(root, "", "root")])
     while queue:
-        node, code = queue.popleft()
+        node, code, parent_id = queue.popleft()
         node.code = code
+        node_id = f"{parent_id}_{code}"
 
         if node.char:  # Leaf node
             code_map[node.char] = code
-            percentage = (node.freq / total_freq) * 100
-            print(f"{node.char}: {code} ({percentage:.2f}%)")
+            label = f"{code[-1:]}: {node.char}: ({node.freq/total_freq*100:.1f}%)"
+            tree.create_node(label, node_id, parent=parent_id)
+        else:
+            tree.create_node(code[-1:], node_id, parent=parent_id)
 
         if node.left:
-            queue.append((node.left, code + "0"))
+            queue.append((node.left, code + "0", node_id))
         if node.right:
-            queue.append((node.right, code + "1"))
+            queue.append((node.right, code + "1", node_id))
+
+    # Print tree with fixed-width formatting
+    for l in tree.show(line_type="ascii-em", idhidden=True, stdout=False):
+        print(l, end="")
 
     return {
-        "codes": dict(sorted(code_map.items())),  # Alphabetical order
+        "codes": dict(sorted(code_map.items())),
         "tree": root.node_to_dict(),
     }
 
@@ -129,11 +173,11 @@ def restrict_dictionary(words: List[str], top_chars: List[tuple[str, int]]):
     )
 
 
-def analyze_k_values(words: List[str], k_range=trange(3, 27)):
+def analyze_k_values(words: List[str], k_range=range(1, K + 1)):
     """Find change in average prefix length E(l) as function of k, number of codewords.
     Annotates plot with new characters added at each K.
     """
-    char_freq = analyze_frequencies(words)
+    char_freq = LETTER_FREQUENCIES  # analyze_frequencies(words)
     avg_lengths = []
     alphabet_sets = []  # Cache alphabet sets for each k
 
@@ -193,7 +237,7 @@ def main():
 
     analyze_k_values(words)  # Add analysis before original logic
 
-    char_freq = analyze_frequencies(words)
+    char_freq = LETTER_FREQUENCIES  # analyze_frequencies(words)
     huffman_root, top_chars = build_huffman_tree(char_freq, top_k=K)
     json_output = build_prefix_code(huffman_root, char_freq)
 
