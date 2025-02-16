@@ -1,9 +1,33 @@
 from typing import Literal
-from pydantic_settings import BaseSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict
 from brainflow.board_shim import BoardIds
+from pathlib import Path
+
+import os
+
+PROJECT_DIR = Path(__file__).parent.parent
 
 
 class Settings(BaseSettings):
+    """Application settings with environment variable support."""
+
+    # API Keys
+    ELEVEN_LABS_API_KEY: str
+    ELEVEN_LABS_VOICE_ID: str = "iP95p4xoKVk53GoZ742B"
+    LUMA_AI_AUTH_TOKEN: str
+
+    # Service Configuration
+    ENABLE_TTS: bool = True
+    ENABLE_IMAGE_GEN: bool = True
+
+    # Voice Settings
+    DEFAULT_STABILITY: float = 0.8
+    DEFAULT_SIMILARITY_BOOST: float = 0.8
+    DEFAULT_STYLE_EXAGGERATION: float = 0.5
+
+    # Model Configuration
+    TTS_MODEL_ID: str = "eleven_multilingual_v2"
+
     # App settings
     mode: Literal["inference", "collect", "simulate"] = "collect"
 
@@ -21,11 +45,21 @@ class Settings(BaseSettings):
 
     HOST: str = "0.0.0.0"
     PORT: int = 6969
-    ENV: str = "development"
+    ENV: str = "production"
 
-    # class Config:
-    #     env_prefix = "BCI_"  # Environment variables will be prefixed with BCI_
+    class Config:
+        dev_env_files = [
+            os.path.join(PROJECT_DIR, ".env"),
+            os.path.join(PROJECT_DIR, ".env.development"),
+        ]
+
+        env_file = (
+            dev_env_files
+            if os.environ.get("ENV", "development") == "development"
+            else [dev_env_files[0]]
+        )
+        env_file_encoding = "utf-8"
+        case_sensitive = True
 
 
-# Create settings instance
 settings = Settings()

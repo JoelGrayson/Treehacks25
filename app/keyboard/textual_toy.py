@@ -13,6 +13,8 @@ from app.keyboard.constants import HUFFMAN, FREQ_WORDS
 from dataclasses import dataclass, field
 import asyncio
 
+K = 1  # Number of suggestions to show
+
 
 @dataclass
 class AutocorrectEngine:
@@ -51,7 +53,7 @@ class AutocorrectEngine:
 
             await asyncio.sleep(0)
 
-        while len(results) < 5 and not pq.empty():
+        while len(results) < K and not pq.empty():
             results.append(pq.get())
 
         return [word for _, word in sorted(results)]
