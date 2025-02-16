@@ -11,7 +11,7 @@ PROJECT_DIR = Path(__file__).parent.parent
 class Settings(BaseSettings):
     """Application settings with environment variable support."""
 
-    SIMULATE: bool = True
+    SIMULATE: bool = False
 
     # API Keys
     ELEVEN_LABS_API_KEY: str

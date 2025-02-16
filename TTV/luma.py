@@ -3,9 +3,8 @@ import time
 import random
 from lumaai import LumaAI
 
-client = LumaAI(
-    auth_token="luma-auth-token"
-)
+client = LumaAI(auth_token="luma-auth-token")
+
 
 def get_eeg_data(delta, theta, alpha, beta, gamma):
     eeg_data = {
@@ -13,16 +12,17 @@ def get_eeg_data(delta, theta, alpha, beta, gamma):
         "theta": theta,
         "alpha": alpha,
         "beta": beta,
-        "gamma": gamma
+        "gamma": gamma,
     }
-    
+
     # Normalize values to [0, 1]
     total_power = sum(eeg_data.values())
     if total_power > 0:
         eeg_data = {k: v / total_power for k, v in eeg_data.items()}
-    
+
     print(f"EEG Data: {eeg_data}")
     return eeg_data
+
 
 def generate_image(beta, prompt):
     if beta > 0.7:
@@ -31,10 +31,8 @@ def generate_image(beta, prompt):
         emotion_prompt = "natural lighting, realistic color balance, neutral tones"
     else:
         emotion_prompt = "soft pastel colors, dreamy, soothing tones, low contrast, sadder / more monotone"
-    
-    generation = client.generations.image.create(
-        prompt= prompt + emotion_prompt
-    )
+
+    generation = client.generations.image.create(prompt=f"{prompt}  , {emotion_prompt}")
 
     completed = False
     while not completed:
@@ -50,11 +48,18 @@ def generate_image(beta, prompt):
 
     # download the image
     response = requests.get(image_url, stream=True)
-    with open(f'{generation.id}.jpg', 'wb') as file:
+    with open(f"{generation.id}.jpg", "wb") as file:
         file.write(response.content)
     print(f"File downloaded as {generation.id}.jpg")
 
-delta, theta, alpha, beta, gamma = random.uniform(0, 1), random.uniform(0, 1), random.uniform(0, 1), random.uniform(0, 1), random.uniform(0, 1)
+
+delta, theta, alpha, beta, gamma = (
+    random.uniform(0, 1),
+    random.uniform(0, 1),
+    random.uniform(0, 1),
+    random.uniform(0, 1),
+    random.uniform(0, 1),
+)
 eeg_data = get_eeg_data(delta, theta, alpha, beta, gamma)
 prompt = "A bear on a motorcycle dancing"
 generate_image(eeg_data["beta"], prompt)

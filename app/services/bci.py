@@ -89,7 +89,7 @@ def bci_session(flush_seconds: int = 4):
     board_params = BrainFlowInputParams()
     board_params.serial_port = settings.serial_port
 
-    board = BoardShim(settings.board_Id, board_params)
+    board = BoardShim(settings.board_id, board_params)
     print("Preparing BCI connection...")
     board.prepare_session()
     board.start_stream()

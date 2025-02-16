@@ -5,12 +5,20 @@ from fastapi.responses import RedirectResponse
 from textual.app import App
 from textual.widgets import Static
 from textual.reactive import reactive
+from textual.binding import Binding
+from textual.containers import Container, Vertical
 from app.models import BitEvent, WordEvent
 from app.api.ws_handler import WebSocketHandler
 from app.config.settings import settings
 from app.keyboard.utils import binary_to_word, pad_coding
+from app.services.eleven import TTSService, EEGData
+from app.services.luma import ImageService
+from playsound import playsound
 import uvicorn
 import asyncio
+from pathlib import Path
+from textual import widgets
+import subprocess
 
 # Initialize FastAPI
 app = FastAPI()
@@ -24,19 +32,32 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Initialize services
+tts_service = TTSService()
+image_service = ImageService()
+
 
 # TUI Message Display App
 class MessageDisplay(App):
     """Textual application for displaying bit streams and word suggestions."""
 
+    BINDINGS = [
+        Binding("enter,return", "submit", "Submit word"),
+        Binding("backspace", "reset", "Reset input"),
+    ]
+
     current_bits = reactive("")
     suggestions = reactive([])
     complete_word = reactive(None)
+    current_image = reactive(None)
 
     def compose(self):
         """Create and yield widgets for the app."""
-        yield Static(id="bit_display")
-        yield Static(id="suggestions")
+        with Vertical():
+            yield Static(id="bit_display")
+            yield Static(id="suggestions")
+            yield Static(id="status", classes="status")
+            yield widgets.Static("", id="image_display")
 
     def watch_current_bits(self, bits: str) -> None:
         """Update bit display with padded visualization."""
@@ -63,6 +84,58 @@ class MessageDisplay(App):
     def watch_complete_word(self, word: str) -> None:
         """Trigger bit display update when word completes."""
         self.watch_current_bits(self.current_bits)
+
+    def watch_current_image(self, image_path: Path | None) -> None:
+        """Open image in default system viewer when new image is generated."""
+        if image_path and image_path.exists():
+            # Use 'open' command on macOS to display image in default viewer
+            subprocess.run(["open", str(image_path)])
+            self.query_one("#image_display").update("Image opened in external viewer")
+        else:
+            self.query_one("#image_display").update("")
+
+    async def action_submit(self) -> None:
+        """Handle Enter key press - generate audio/image and clear input."""
+        if not self.complete_word:
+            return
+
+        self.query_one("#status").update("Generating audio and image...")
+        # Mock EEG data for demo
+        mock_eeg = EEGData(delta=0.2, theta=0.2, alpha=0.2, beta=0.2, gamma=0.2)
+
+        try:
+            # Generate audio and image concurrently
+            audio_task = asyncio.create_task(
+                tts_service.process_text(self.complete_word, mock_eeg)
+            )
+            image_task = asyncio.create_task(
+                image_service.generate_image(self.complete_word, mock_eeg)
+            )
+
+            audio_path, image_path = await asyncio.gather(audio_task, image_task)
+
+            # Play audio in background
+            subprocess.run(["afplay", str(audio_path)])
+
+            # Update image display
+            self.current_image = image_path
+
+            # Clear input
+            self.current_bits = ""
+            self.complete_word = None
+            self.suggestions = []
+
+            self.query_one("#status").update("Generated!")
+        except Exception as e:
+            self.query_one("#status").update(f"Error: {str(e)}")
+
+    async def action_reset(self) -> None:
+        """Reset all reactive states when backspace is pressed."""
+        self.current_bits = ""
+        self.complete_word = None
+        self.suggestions = []
+        self.current_image = None
+        self.query_one("#status").update("Reset")
 
 
 # Global bridge for message passing
