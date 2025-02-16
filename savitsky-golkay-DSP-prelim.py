@@ -1,7 +1,7 @@
 import numpy as np
 from scipy.signal import savgol_filter
 import time
-import random  # Simulating real-time EEG input
+# import random
 
 sampling_rate = 250  
 window_size = 11  
@@ -25,9 +25,9 @@ def process_eeg_stream(new_sample):
     else:
         return new_sample
 
-for _ in range(100):
-    raw_eeg = np.sin(2 * np.pi * 1.2 * time.time()) + 0.2 * np.sin(2 * np.pi * 10 * time.time()) + random.uniform(-0.1, 0.1)
-    smoothed_eeg = process_eeg_stream(raw_eeg)
+# for _ in range(100):
+#     #raw_eeg = np.sin(2 * np.pi * 1.2 * time.time()) + 0.2 * np.sin(2 * np.pi * 10 * time.time()) + random.uniform(-0.1, 0.1)
+#     smoothed_eeg = process_eeg_stream(raw_eeg)
     
-    print(f"Raw EEG: {raw_eeg:.3f}, Smoothed EEG: {smoothed_eeg:.3f}")
-    time.sleep(1/sampling_rate)
+#     print(f"Raw EEG: {raw_eeg:.3f}, Smoothed EEG: {smoothed_eeg:.3f}")
+#     time.sleep(1/sampling_rate)
