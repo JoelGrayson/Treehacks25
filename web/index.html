@@ -42,12 +42,32 @@
             }
         });
 
-        function updateChart() {
-            myChart.data.datasets[0].data=Array.from({length: 16}, ()=>Math.floor(Math.random()*100));
-            myChart.update();
-        }
+        // function updateChart() {
+        //     myChart.data.datasets[0].data=Array.from({length: 16}, ()=>Math.floor(Math.random()*100));
+        //     myChart.update();
+        // }
 
-        setInterval(updateChart, 1000);
+        // setInterval(updateChart, 1000);
+    
+        // create a websocket to /websocket
+        const ws = new WebSocket('ws://127.0.0.1:5000/websocket');
+        ws.onopen = () => console.log('Connected to server');
+        ws.onmessage = (event) => {
+            const data = JSON.parse(event.data);
+            console.log(data);
+            if (data.type === 'eeg') {
+                const eegData = data.data;
+                const newData = [];
+                for (let i = 1; i <= 8; i++) {
+                    newData.push(eegData[i].reduce((a, b) => a + b, 0) / eegData[i].length);
+                }
+                for (let i = 9; i <= 16; i++) {
+                    newData.push(eegData[i].reduce((a, b) => a + b, 0) / eegData[i].length);
+                }
+                myChart.data.datasets[0].data = newData;
+                myChart.update();
+            }
+        };
     </script>
 </body>
 </html>
