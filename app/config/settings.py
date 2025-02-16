@@ -11,6 +11,8 @@ PROJECT_DIR = Path(__file__).parent.parent
 class Settings(BaseSettings):
     """Application settings with environment variable support."""
 
+    SIMULATE: bool = True
+
     # API Keys
     ELEVEN_LABS_API_KEY: str
     ELEVEN_LABS_VOICE_ID: str = "iP95p4xoKVk53GoZ742B"
@@ -40,8 +42,8 @@ class Settings(BaseSettings):
     # For Joe Li over-ear BCI, 12am
     accel_pitch_thres: float = 0.14
     accel_roll_thres: float = 0.14
-    left_clench_thres: float = 500
-    right_clench_thres: float = 350
+    left_clench_thres: float = 200 if SIMULATE else 500
+    right_clench_thres: float = 200 if SIMULATE else 350
 
     HOST: str = "0.0.0.0"
     PORT: int = 6969

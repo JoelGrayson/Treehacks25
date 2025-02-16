@@ -2,7 +2,7 @@ from collections import Counter
 from dataclasses import dataclass
 from typing import Optional, Dict, List
 from queue import PriorityQueue
-from tqdm import tqdm, trange
+from tqdm import tqdm
 from pathlib import Path
 from collections import deque
 import json
@@ -232,7 +232,7 @@ def analyze_k_values(words: List[str], k_range=range(1, K + 1)):
 
 
 def main():
-    with Path("english.txt").open() as f:
+    with (Path(__file__).parent / "english.txt").open() as f:
         words = [w.strip() for w in f.readlines()]
 
     analyze_k_values(words)  # Add analysis before original logic
@@ -241,11 +241,11 @@ def main():
     huffman_root, top_chars = build_huffman_tree(char_freq, top_k=K)
     json_output = build_prefix_code(huffman_root, char_freq)
 
-    with Path("english'.txt").open("w") as f:
+    with (Path(__file__).parent / "english'.txt").open("w") as f:
         for w in restrict_dictionary(words, top_chars):
             f.write(w + "\n")
 
-    with Path("huffman.json").open("w") as f:
+    with (Path(__file__).parent / "huffman.json").open("w") as f:
         f.write(json.dumps(json_output, indent=2))
 
 
