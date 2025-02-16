@@ -1,10 +1,5 @@
 from flask import Flask, redirect
 from flask_sock import Sock
-from brainflow.board_shim import BoardShim, BrainFlowInputParams, BoardIds
-from brainflow.data_filter import DataFilter, FilterTypes
-import time
-import numpy as np
-import json
 from main import run
 
 
@@ -20,6 +15,6 @@ sock = Sock(app)
 
 
 @sock.route("/websocket")
-def route(ws):  # sends { type: letter | eeg, data: {} | '' }
+def route(ws):  # sends { type: letter | eeg | image, data: {} | '' }
     run(ws)
 
