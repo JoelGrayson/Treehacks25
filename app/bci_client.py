@@ -4,7 +4,6 @@ import websocket
 import json
 import time
 import pickle
-import numpy as np
 from pathlib import Path
 from app.services.bci import bci_session, process_board_data, BCIParams
 from app.config.settings import settings
@@ -23,47 +22,53 @@ params = BCIParams(
     clench_thres=settings.clench_thres,
 )
 
-ws = websocket.WebSocket()
-ws.connect(f"ws://{settings.HOST}:{settings.PORT}/ws")
 
-if SIMULATE:
-    with Path("eeg_data.pkl").open("rb") as f:
-        sim_data = pickle.load(f)
-        print(len(sim_data))
-    sim_idx = 0
-
-    # TODO: Sim broken spams 1. Assume works, then?
-
-    pbar = tqdm(unit=" bits")
+def loop_forever_bci(fetch_data, baseline, params, ws, delay=0.1):
+    """Run BCI processing loop with configurable data source."""
+    i = 0
+    pbar = tqdm(unit=" bits") if SIMULATE else None
     last_check = time.time()
+
     while True:
-        if time.time() - last_check < 0.1:
+        if time.time() - last_check < delay:
             continue
 
-        data = sim_data[sim_idx % len(sim_data)]
-        bit_event = process_board_data(data, sim_data[0], params)
-
-        if bit_event.bit != StateBit.NOTHING:
-            ws.send(json.dumps({"event": "bit", "data": asdict(bit_event)}))
+        event_data = process_board_data(fetch_data(i), baseline, params)
+        # print(event_data.raw_data)
+        if event_data.bit != StateBit.NOTHING:
+            ws.send(json.dumps({"event": "bit", "data": asdict(event_data)}))
             pbar.update(1)
-            pbar.set_postfix(bit=bit_event.bit.value)
-
-        sim_idx += 1
+            pbar.set_postfix(bit=event_data.bit.value)
+        else:
+            pbar.set_postfix(bit="-1")
+        i += 1
         last_check = time.time()
-else:
-    with bci_session(params) as board:
-        baseline_data = board.get_board_data()
 
-        while True:
-            data = board.get_board_data()
-            bit_event = process_board_data(data, baseline_data, params)
 
-            if bit_event.bit != StateBit.NOTHING:
-                ws.send(
-                    json.dumps(
-                        {
-                            "event": "bit",
-                            "data": asdict(bit_event),
-                        }
-                    )
-                )
+try:
+    ws = websocket.WebSocket()
+    ws.connect(f"ws://{settings.HOST}:{settings.PORT}/ws")
+    if SIMULATE:
+        with Path("eeg_data.pkl").open("rb") as f:
+            data = pickle.load(f)
+        loop_forever_bci(
+            fetch_data=lambda i: data[i % len(data)],
+            baseline=data[0],
+            params=params,
+            ws=ws,
+            delay=0.1,
+        )
+    else:
+        with bci_session(params) as board:
+            baseline_data = board.get_board_data()
+            loop_forever_bci(
+                fetch_data=lambda _: board.get_board_data(),
+                baseline=baseline_data,
+                params=params,
+                ws=ws,
+            )
+finally:
+    ws.abort()
+    pass
+    # if ws.connected:
+    #     ws.close()
