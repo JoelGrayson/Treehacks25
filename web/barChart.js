@@ -3,7 +3,7 @@ function barChart() {
     const labels = ['α', 'β', 'γ', 'δ', 'θ'];
     const initialData = [0, 0, 0, 0, 0];
 
-    const chart = new Chart(ctx, {
+    theBarChart=new Chart(ctx, {
         type: 'bar',
         data: {
             labels: labels,
@@ -41,14 +41,5 @@ function barChart() {
             }
         }
     });
-
-    function updateChart() {
-        const newData = chart.data.datasets[0].data.map(() => Math.floor(Math.random() * 100));
-        chart.data.datasets[0].data = newData;
-        chart.update();
-    }
-
-    // Update the chart every second
-    setInterval(updateChart, 1000);
 }
 

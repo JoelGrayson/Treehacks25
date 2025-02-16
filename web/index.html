@@ -68,7 +68,9 @@
             </div>
 
 
-            <canvas id='huffmanTree' style='zoom: 0.45'></canvas>
+            <!-- <canvas id='huffmanTree' style='zoom: 0.45'></canvas> -->
+            <!-- embed †ree.svg -->
+            <img src="tree.svg" alt="Huffman Tree" style='width: 80%; margin: auto;'>
         </div>
 
         <div id='gap' class='bg-black w-[3px] h-screen'></div>
@@ -84,8 +86,9 @@
 
 
     <script src="barChart.js"></script>
-    <script src="huffmanTreeConstant.js"></script>
-    <script src="huffman.js"></script>
+    <!-- <script src="huffmanTreeConstant.js"></script> -->
+    <!-- <script src="huffman.js"></script> -->
+    <script src="eegChart.js"></script>
 
     <script>
         // Initialize Split.js
@@ -97,97 +100,7 @@
         });
 
 
-
-        // Generate random data for a single line
-        function generateData() {
-            return Array.from({length: 10}, () => Math.floor(Math.random() * 401) - 200);
-        }
-
-        // Generate a random color
-        function getRandomColor() {
-            const r = Math.floor(Math.random() * 256);
-            const g = Math.floor(Math.random() * 256);
-            const b = Math.floor(Math.random() * 256);
-            return `rgb(${r}, ${g}, ${b})`;
-        }
-
-        // Create labels for the x-axis (time points)
-        const labels = Array.from({length: 10}, (_, i) => ``);
-        // const labels = Array.from({length: 10}, (_, i) => `T${i + 1}`);
-
-        // Create 16 charts
-        const chartsContainer = document.getElementById('chartsContainer');
-        let charts=[];
-
-        for (let i = 0; i < 16; i++) {
-            const chartWrapper = document.createElement('div');
-            chartWrapper.className = 'chart-wrapper';
-            chartWrapper.innerHTML=`<h3 class='text-center font-bold'>EEG ${i+1}</h3>`;
-            
-            const canvas = document.createElement('canvas');
-            chartWrapper.appendChild(canvas);
-            chartsContainer.appendChild(chartWrapper);
-
-            const ctx = canvas.getContext('2d');
-            
-            chart=new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: `Dataset ${i + 1}`,
-                        data: generateData(),
-                        borderColor: getRandomColor(),
-                        tension: 0.1,
-                        fill: false
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        y: {
-                            beginAtZero: false,
-                            suggestedMin: -200,
-                            suggestedMax: 200
-                        }
-                    },
-                    plugins: {
-                        legend: {
-                            display: false
-                        }
-                    }
-                }
-            });
-            charts.push(chart);
-        }
-        
-        
-        
-        
-        // Generate random data for a single line
-        function generateData() {
-            return Array.from({length: 10}, () => Math.floor(Math.random() * 401) - 200);
-        }
-
-        // Generate a random color
-        function getRandomColor() {
-            const r = Math.floor(Math.random() * 256);
-            const g = Math.floor(Math.random() * 256);
-            const b = Math.floor(Math.random() * 256);
-            return `rgb(${r}, ${g}, ${b})`;
-        }
-
-        // create a websocket to /websocket
-        const data=[];
-        
-        // const cEl=document.getElementById('characters');
-        // function renderData() {
-        //     cEl.innerHTML=`
-        //         ${}
-        //     `;
-        // }
-
+        let theBarChart;
         barChart();
 
 
@@ -208,11 +121,17 @@
             if (type==='byte') {
                 // TODO: add a byte
             }
-            if (type==='eeg') {
+            if (type==='cycle') {
                 for (let i=0; i<16; i++) {
                     charts[i].data.datasets[0].data.shift();
-                    charts[i].data.datasets[0].data.push(data[i]);
+                    charts[i].data.datasets[0].data.push(data.data[i]);
+                    charts[i].update();
                 }
+
+                const g=data.greeks;
+                theBarChart.data.datasets[0].data = [Math.random()*10, Math.random()*10, Math.random()*10, Math.random()*10, Math.random()*10, ];
+                // theBarChart.data.datasets[0].data = [g.alpha, g.beta, g.gamma, g.delta, g.theta];
+                theBarChart.update();
             }
         };
     </script>

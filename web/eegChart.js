@@ -69,7 +69,7 @@ for (let i = 0; i < 16; i++) {
 
 // Generate random data for a single line
 function generateData() {
-    return Array.from({length: 10}, () => Math.floor(Math.random() * 401) - 200);
+    return Array.from({length: 10}, () => 0);
 }
 
 // Generate a random color
