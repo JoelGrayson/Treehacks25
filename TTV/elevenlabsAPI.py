@@ -1,8 +1,8 @@
 import requests
 import json
 
-API_KEY = "elevenlabs-api-key"
-VOICE_ID = "elevenlabs-voice-id"
+API_KEY = "sk_c34bd4413c06f97126b3de337952c1391bfc96774d8e66c0"
+VOICE_ID = "iP95p4xoKVk53GoZ742B"
 
 def map_alpha_to_speech(alpha_value):
     """
@@ -22,7 +22,7 @@ def map_alpha_to_speech(alpha_value):
         }
     else:
         return {
-            "stability": 0.3,  
+            "stability": 1.0,  
             "similarity_boost": 0.8,
             "text_modifier": lambda text: text.upper() + "!!!"  
         }
@@ -56,6 +56,6 @@ def generate_speech(text, alpha_value):
     else:
         print("Error:", response.text)
 
-alpha_wave_value = 0.3
-user_text = "I am excited to try this new technology"
+alpha_wave_value = 0.2
+user_text = "You’re leaving?\" she asked, her voice trembling with sadness. \"That’s it!\" he exclaimed triumphantly."
 generate_speech(user_text, alpha_wave_value)
