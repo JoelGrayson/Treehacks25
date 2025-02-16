@@ -1,33 +1,60 @@
 import requests
-LUMA_API_KEY = "your-luma-api-key"
+import time
+import random
+from lumaai import LumaAI
 
-def map_alpha_to_prompt(base_prompt, alpha_value):
-    if alpha_value > 0.7: 
-        return f"{base_prompt}, soft pastel colors, dreamy, soothing tones, low contrast"
-    elif alpha_value > 0.4:
-        return f"{base_prompt}, natural lighting, realistic color balance, warm tones"
-    else: 
-        return f"{base_prompt}, neon colors, high contrast, vibrant, cinematic lighting"
+client = LumaAI(
+    auth_token="luma-auth-token"
+)
 
-def generate_image_with_luma(prompt):
-    url = "https://api.luma.com/v1/generate"  
-    headers = {
-        "Authorization": f"Bearer {LUMA_API_KEY}",
-        "Content-Type": "application/json"
+def get_eeg_data(delta, theta, alpha, beta, gamma):
+    eeg_data = {
+        "delta": delta,
+        "theta": theta,
+        "alpha": alpha,
+        "beta": beta,
+        "gamma": gamma
     }
-    payload = {"prompt": prompt, "style": "cinematic"}
     
-    response = requests.post(url, headers=headers, json=payload)
+    # Normalize values to [0, 1]
+    total_power = sum(eeg_data.values())
+    if total_power > 0:
+        eeg_data = {k: v / total_power for k, v in eeg_data.items()}
     
-    if response.status_code == 200:
-        return response.json()["image_url"]
+    print(f"EEG Data: {eeg_data}")
+    return eeg_data
+
+def generate_image(beta, prompt):
+    if beta > 0.7:
+        emotion_prompt = "neon / warm colors, high contrast, vibrant, cinematic lighting, highly energetic, excited, happy"
+    elif beta > 0.4:
+        emotion_prompt = "natural lighting, realistic color balance, neutral tones"
     else:
-        print("Error:", response.text)
-        return None
+        emotion_prompt = "soft pastel colors, dreamy, soothing tones, low contrast, sadder / more monotone"
+    
+    generation = client.generations.image.create(
+        prompt= prompt + emotion_prompt
+    )
 
-alpha_wave_value = 0.3 
-base_prompt = "A futuristic city at night"
-modified_prompt = map_alpha_to_prompt(base_prompt, alpha_wave_value)
-image_url = generate_image_with_luma(modified_prompt)
+    completed = False
+    while not completed:
+        generation = client.generations.get(id=generation.id)
+        if generation.state == "completed":
+            completed = True
+        elif generation.state == "failed":
+            raise RuntimeError(f"Generation failed: {generation.failure_reason}")
+        print("Dreaming")
+        time.sleep(2)
 
-print("Generated Image URL:", image_url)
+    image_url = generation.assets.image
+
+    # download the image
+    response = requests.get(image_url, stream=True)
+    with open(f'{generation.id}.jpg', 'wb') as file:
+        file.write(response.content)
+    print(f"File downloaded as {generation.id}.jpg")
+
+delta, theta, alpha, beta, gamma = random.uniform(0, 1), random.uniform(0, 1), random.uniform(0, 1), random.uniform(0, 1), random.uniform(0, 1)
+eeg_data = get_eeg_data(delta, theta, alpha, beta, gamma)
+prompt = "A bear on a motorcycle dancing"
+generate_image(eeg_data["beta"], prompt)
