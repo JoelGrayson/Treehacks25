@@ -2,7 +2,7 @@ from collections import Counter
 from dataclasses import dataclass
 from typing import Optional, Dict, List
 from queue import PriorityQueue
-from tqdm import tqdm
+from tqdm import tqdm, trange
 from pathlib import Path
 from collections import deque
 import json
@@ -129,18 +129,20 @@ def restrict_dictionary(words: List[str], top_chars: List[tuple[str, int]]):
     )
 
 
-def analyze_k_values(words: List[str], k_range: range = range(3, 27)):
+def analyze_k_values(words: List[str], k_range=trange(3, 27)):
     """Find change in average prefix length E(l) as function of k, number of codewords.
-    Save Plotly line plot
+    Annotates plot with new characters added at each K.
     """
     char_freq = analyze_frequencies(words)
     avg_lengths = []
+    alphabet_sets = []  # Cache alphabet sets for each k
 
-    for k in tqdm(k_range, desc="Analyzing K values"):
+    for k in k_range:
         # Build tree and get codes for this K
-        huffman_root, _ = build_huffman_tree(char_freq, top_k=k)
-        json_output = build_prefix_code(huffman_root, char_freq)
+        root, top_chars = build_huffman_tree(char_freq, top_k=k)
+        json_output = build_prefix_code(root, char_freq)
         codes = json_output["codes"]
+        alphabet_sets.append(set(codes.keys()))
 
         # Calculate weighted average prefix length
         total_freq = sum(char_freq.values())
@@ -151,7 +153,7 @@ def analyze_k_values(words: List[str], k_range: range = range(3, 27)):
         )
         avg_lengths.append(avg_length)
 
-    # Create plotly figure
+    # Create plotly figure with annotations
     fig = go.Figure()
     fig.add_trace(
         go.Scatter(
@@ -162,9 +164,22 @@ def analyze_k_values(words: List[str], k_range: range = range(3, 27)):
         )
     )
 
+    # Add annotations for new characters at each k
+    for i in range(len(alphabet_sets) - 1, 0, -1):
+        new_chars = alphabet_sets[i] - alphabet_sets[i - 1]
+        if new_chars:
+            fig.add_annotation(
+                x=list(k_range)[i],
+                y=avg_lengths[i],
+                text=f"+{','.join(sorted(list(new_chars)))}",
+                showarrow=True,
+                arrowhead=1,
+                yshift=5,
+            )
+
     fig.update_layout(
         title="Average Huffman Code Length vs K",
-        xaxis_title="K (Number of Characters)",
+        xaxis_title="K (Alphabet Size)",
         yaxis_title="Average Code Length (bits)",
         template="plotly_white",
     )

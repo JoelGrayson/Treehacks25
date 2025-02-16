@@ -26,16 +26,7 @@ class WordValidator(Validator):
 
 
 class WordValidatorApp(App):
-    """Live word validation TUI app."""
-
-    BINDINGS = [("ctrl+c", "quit")]  # Add keyboard bindings
-
-    def action_quit(self) -> None:
-        """Quit the application."""
-        self.exit()
-
     def compose(self):
-        """Create app layout."""
         yield Container(
             Input(
                 placeholder="Type a word...",
