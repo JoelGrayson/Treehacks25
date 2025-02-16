@@ -9,17 +9,23 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/split.js/dist/split.min.js"></script>
     <style>
-        .eeg-tile {
-            background-color: #f3f4f6;
-            border-radius: 0.5rem;
-            padding: 1rem;
-            text-align: center;
-        }
         #characters>div>div:first-child {
             font-size: 50px;
         }
         #characters>div>div:last-child {
             font-size: 20px;
+        }
+
+        .charts-container {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            padding: 20px;
+        }
+        .chart-wrapper {
+            border: 1px solid #ddd;
+            padding: 10px;
+            border-radius: 5px;
         }
     </style>
 </head>
@@ -49,16 +55,18 @@
                 </div>
             </div>
         </div>
+
         <div id='gap' class='bg-black w-[3px] h-screen'></div>
+        
         <div id='right-pane' class='split'>
             Charts
-            <canvas id='chart'></canvas>
+            <div class="charts-container" id="chartsContainer"></div>
         </div>
     </div>
 
 
 
-
+    
 
     <script>
         // Initialize Split.js
@@ -68,6 +76,7 @@
             gutterSize: 10,
             cursor: 'col-resize'
         });
+
 
 
         // Generate random data for a single line
@@ -86,44 +95,65 @@
         // Create labels for the x-axis (time points)
         const labels = Array.from({length: 10}, (_, i) => `T${i + 1}`);
 
-        // Generate datasets for 16 lines
-        const datasets = Array.from({length: 16}, (_, i) => ({
-            label: `Dataset ${i + 1}`,
-            data: generateData(),
-            borderColor: getRandomColor(),
-            tension: 0.1,
-            fill: false
-        }));
+        // Create 16 charts
+        const chartsContainer = document.getElementById('chartsContainer');
 
-        // Get the canvas element
-        const ctx = document.getElementById('chart').getContext('2d');
+        for (let i = 0; i < 16; i++) {
+            const chartWrapper = document.createElement('div');
+            chartWrapper.className = 'chart-wrapper';
+            
+            const canvas = document.createElement('canvas');
+            chartWrapper.appendChild(canvas);
+            chartsContainer.appendChild(chartWrapper);
 
-        // Create the chart
-        new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: labels,
-                datasets: datasets
-            },
-            options: {
-                responsive: true,
-                scales: {
-                    y: {
-                        beginAtZero: false,
-                        suggestedMin: -200,
-                        suggestedMax: 200
-                    }
+            const ctx = canvas.getContext('2d');
+            
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: `Dataset ${i + 1}`,
+                        data: generateData(),
+                        borderColor: getRandomColor(),
+                        tension: 0.1,
+                        fill: false
+                    }]
                 },
-                plugins: {
-                    legend: {
-                        position: 'right',
-                        labels: {
-                            boxWidth: 12
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            suggestedMin: -200,
+                            suggestedMax: 200
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
                         }
                     }
                 }
-            }
-        });
+            });
+        }
+        
+        
+        
+        
+        // Generate random data for a single line
+        function generateData() {
+            return Array.from({length: 10}, () => Math.floor(Math.random() * 401) - 200);
+        }
+
+        // Generate a random color
+        function getRandomColor() {
+            const r = Math.floor(Math.random() * 256);
+            const g = Math.floor(Math.random() * 256);
+            const b = Math.floor(Math.random() * 256);
+            return `rgb(${r}, ${g}, ${b})`;
+        }
 
         // create a websocket to /websocket
         const data=[];
