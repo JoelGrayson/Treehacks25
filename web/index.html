@@ -7,7 +7,6 @@
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- <link href=”https://unpkg.com/tailwindcss@^2/dist/tailwind.min.css” rel=”stylesheet”> -->
     <style>
         .eeg-tile {
             background-color: #f3f4f6;
@@ -19,34 +18,16 @@
 </head>
 <body>
     <h3>EEG Data</h3>
-    <div id="eeg-tiles" class='grid grid-cols-4 gap-4 grid-rows-2'>
-        <div class='eeg-tile' id='l1'>L1</div>
-        <div class='eeg-tile' id='l2'>L2</div>
-        <div class='eeg-tile' id='l3'>L3</div>
-        <div class='eeg-tile' id='l4'>L4</div>
-        <div class='eeg-tile' id='l5'>L5</div>
-        <div class='eeg-tile' id='l6'>L6</div>
-        <div class='eeg-tile' id='l7'>L7</div>
-        <div class='eeg-tile' id='l8'>L8</div>
-        <div class='eeg-tile' id='r1'>R1</div>
-        <div class='eeg-tile' id='r2'>R2</div>
-        <div class='eeg-tile' id='r3'>R3</div>
-        <div class='eeg-tile' id='r4'>R4</div>
-        <div class='eeg-tile' id='r5'>R5</div>
-        <div class='eeg-tile' id='r6'>R6</div>
-        <div class='eeg-tile' id='r7'>R7</div>
-        <div class='eeg-tile' id='r8'>R8</div>
-    </div>
     <canvas id="myChart" width="400" height="200"></canvas>
     <script>
-        const ctx = document.getElementById('myChart').getContext('2d');
-        const myChart = new Chart(ctx, {
+        const ctx=document.getElementById('myChart').getContext('2d');
+        const myChart=new Chart(ctx, {
             type: 'bar',
             data: {
-                labels: ['L1', 'L2', 'L3', 'L4', 'L5', 'L6', 'L7', 'L8', 'L9', 'L10'],
+                labels: ['L1', 'L2', 'L3', 'L4', 'L5', 'L6', 'L7', 'L8', 'R1', 'R2', 'R3', 'R4', 'R5', 'R6', 'R7', 'R8'],
                 datasets: [{
                     label: 'EEG Data',
-                    data: [12, 19, 3, 5, 2, 3, 7, 8, 9, 10],
+                    data: Array(16).fill(0),
                     backgroundColor: 'rgba(75, 192, 192, 0.2)',
                     borderColor: 'rgba(75, 192, 192, 1)',
                     borderWidth: 1
@@ -62,7 +43,7 @@
         });
 
         function updateChart() {
-            myChart.data.datasets[0].data = Array.from({length: 10}, () => Math.floor(Math.random() * 100));
+            myChart.data.datasets[0].data=Array.from({length: 16}, ()=>Math.floor(Math.random()*100));
             myChart.update();
         }
 
