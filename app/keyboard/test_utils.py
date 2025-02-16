@@ -1,7 +1,11 @@
 import random
 from typing import Iterator
-from constants import HUFFMAN, HUFFMAN_INV, WORDS
-from utils import binary_edit_distance, BinaryEditDistanceStream, binary_to_word
+from app.keyboard.constants import HUFFMAN, HUFFMAN_INV, WORDS
+from app.keyboard.utils import (
+    binary_edit_distance,
+    BinaryEditDistanceStream,
+    binary_to_word,
+)
 
 
 # Random bit flip tests

@@ -1,9 +1,4 @@
 #!/bin/bash
+set -e
 
-# export FLASK_ENV=development
-# export FLASK_APP=application.py
-# flask --debug run
-
-# . .venv/bin/activate
-flask run
-
+uv run uvicorn app.main:app --reload --host 0.0.0.0 --port 6969

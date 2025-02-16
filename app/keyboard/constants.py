@@ -1,9 +1,11 @@
 from pathlib import Path
 import json
 
-with Path("english'.txt").open() as f:
+root = Path(__file__).parent
+
+with (root / "english.txt").open() as f:
     WORDS = set(f.read().splitlines())
-with Path("huffman.json").open() as f:
+with (root / "huffman.json").open() as f:
     HUFFMAN = json.load(f)["codes"]
     for k, v in HUFFMAN.items():
         assert len(k) == 1  # Single char
@@ -12,5 +14,5 @@ with Path("huffman.json").open() as f:
 # implicit assert every char in WORDS has HUFFMAN key
 
 # Load frequency table
-with Path("freq.txt").open() as f:
+with (root / "freq.txt").open() as f:
     FREQ_WORDS = f.read().splitlines()  # f ranked by line number.

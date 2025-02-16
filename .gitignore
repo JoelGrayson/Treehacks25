@@ -11,3 +11,4 @@ wheels/
 image-gen/.env
 .env
 *.mp3
+.DS_Store

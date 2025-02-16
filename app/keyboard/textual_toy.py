@@ -3,13 +3,13 @@ from textual.widgets import Input, Label
 from textual.containers import Container
 from textual.validation import ValidationResult, Validator
 from queue import PriorityQueue
-from utils import (
+from app.keyboard.utils import (
     binary_edit_distance,
     pad_coding,
     binary_to_word,
     BinaryEditDistanceStream,
 )
-from constants import HUFFMAN, FREQ_WORDS
+from app.keyboard.constants import HUFFMAN, FREQ_WORDS
 from dataclasses import dataclass, field
 import asyncio
 

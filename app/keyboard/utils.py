@@ -1,5 +1,5 @@
 from typing import Optional
-from constants import HUFFMAN, HUFFMAN_INV, WORDS
+from app.keyboard.constants import HUFFMAN, HUFFMAN_INV, WORDS
 
 
 def pad_coding(word: str) -> tuple[str, str]:
