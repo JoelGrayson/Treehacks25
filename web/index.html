@@ -14,12 +14,18 @@
             padding: 1rem;
             text-align: center;
         }
+        #characters>div>div:first-child {
+            font-size: 50px;
+        }
+        #characters>div>div:last-child {
+            font-size: 20px;
+        }
     </style>
 </head>
 <body>
     <div class='flex w-full h-full'>
         <div id='left-pane' class='w-[50%]'>
-            <div id='characters'>
+            <div id='characters' class='flex gap-2'>
                 <div>
                     <div>H</div>
                     <div>0001</div>
@@ -45,6 +51,7 @@
         <div id='gap' class='bg-black w-[3px] h-screen'></div>
         <div id='right-pane' class='w-[50%]'>
             Charts
+            <canvas id='chart'></canvas>
         </div>
     </div>
 
@@ -53,9 +60,64 @@
 
 
     <script>
+        // Generate random data for a single line
+        function generateData() {
+            return Array.from({length: 10}, () => Math.floor(Math.random() * 401) - 200);
+        }
+
+        // Generate a random color
+        function getRandomColor() {
+            const r = Math.floor(Math.random() * 256);
+            const g = Math.floor(Math.random() * 256);
+            const b = Math.floor(Math.random() * 256);
+            return `rgb(${r}, ${g}, ${b})`;
+        }
+
+        // Create labels for the x-axis (time points)
+        const labels = Array.from({length: 10}, (_, i) => `T${i + 1}`);
+
+        // Generate datasets for 16 lines
+        const datasets = Array.from({length: 16}, (_, i) => ({
+            label: `Dataset ${i + 1}`,
+            data: generateData(),
+            borderColor: getRandomColor(),
+            tension: 0.1,
+            fill: false
+        }));
+
+        // Get the canvas element
+        const ctx = document.getElementById('chart').getContext('2d');
+
+        // Create the chart
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: datasets
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: false,
+                        suggestedMin: -200,
+                        suggestedMax: 200
+                    }
+                },
+                plugins: {
+                    legend: {
+                        position: 'right',
+                        labels: {
+                            boxWidth: 12
+                        }
+                    }
+                }
+            }
+        });
+
         // create a websocket to /websocket
         const data=[];
-
+        
         // const cEl=document.getElementById('characters');
         // function renderData() {
         //     cEl.innerHTML=`
@@ -63,22 +125,25 @@
         //     `;
         // }
         
-        // const ws=new WebSocket('ws://127.0.0.1:5000/websocket');
-        // ws.onopen=()=>console.log('Connected to server');
-        // ws.onmessage=(event)=>{
-        //     const got=JSON.parse(event.data);
-        //     console.log(got);
-        //     const { type, data }=got;
-        //     if (type==='audio') {
-        //         // TODO: play audio at URL data (passed in from Hume)
-        //     }
-        //     if (type==='char') {
-        //         // TODO: add character to the display
-        //     }
-        //     if (type==='byte') {
-        //         // TODO: add a byte
-        //     }
-        // };
+        const ws=new WebSocket('ws://127.0.0.1:5000/websocket');
+        ws.onopen=()=>console.log('Connected to server');
+        ws.onmessage=(event)=>{
+            const got=JSON.parse(event.data);
+            console.log(got);
+            const { type, data }=got;
+            if (type==='audio') {
+                // TODO: play audio at URL data (passed in from Hume)
+            }
+            if (type==='char') {
+                // TODO: add character to the display
+            }
+            if (type==='byte') {
+                // TODO: add a byte
+            }
+            if (type==='eeg') {
+                chart
+            }
+        };
     </script>
 </body>
 </html>
