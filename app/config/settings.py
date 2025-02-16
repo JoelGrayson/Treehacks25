@@ -16,7 +16,8 @@ class Settings(BaseSettings):
     # For Joe Li over-ear BCI, 12am
     accel_pitch_thres: float = 0.14
     accel_roll_thres: float = 0.14
-    clench_thres: float = 200
+    left_clench_thres: float = 500
+    right_clench_thres: float = 350
 
     HOST: str = "0.0.0.0"
     PORT: int = 6969

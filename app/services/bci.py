@@ -4,6 +4,7 @@ from brainflow.board_shim import BoardShim, BrainFlowInputParams
 from brainflow.data_filter import DataFilter
 import numpy as np
 
+import time
 from app.models import GreekWaves, StateBit, BitEvent
 from app.config.settings import settings
 
@@ -12,11 +13,12 @@ from app.config.settings import settings
 class BCIParams:
     """Parameters for BCI device connection"""
 
-    serial_port: str
-    board_id: int
-    accel_pitch_thres: float
-    accel_roll_thres: float
-    clench_thres: float
+    serial_port: str = settings.serial_port
+    board_id: int = settings.board_id
+    accel_pitch_thres: float = settings.accel_pitch_thres
+    accel_roll_thres: float = settings.accel_roll_thres
+    left_clench_thres: float = settings.left_clench_thres
+    right_clench_thres: float = settings.right_clench_thres
 
 
 def get_greek_waves(data: np.ndarray, sampling_rate: int) -> GreekWaves:
@@ -42,22 +44,24 @@ def action_to_state(
     range_accel_nod: float,
     range_accel_shake: float,
     params: BCIParams,
+    last_bit: StateBit,
 ) -> StateBit:
     """Detect movement type based on sensor ranges"""
-    if (
-        range_accel_nod > range_accel_shake
-        and range_accel_nod > params.accel_pitch_thres
-    ):
-        return StateBit.NOD
-    elif (
-        range_accel_shake > range_accel_nod
-        and range_accel_shake > params.accel_roll_thres
-    ):
-        return StateBit.SHAKE
-    elif range_left > range_right and range_left > params.clench_thres:
-        return StateBit.LEFT_CLENCH
-    elif range_right > range_left and range_right > params.clench_thres:
-        return StateBit.RIGHT_CLENCH
+    if last_bit == StateBit.NOTHING:
+        if (
+            range_accel_nod > range_accel_shake
+            and range_accel_nod > params.accel_pitch_thres
+        ):
+            return StateBit.NOD
+        elif (
+            range_accel_shake > range_accel_nod
+            and range_accel_shake > params.accel_roll_thres
+        ):
+            return StateBit.SHAKE
+        elif range_left > range_right and range_left > params.left_clench_thres:
+            return StateBit.LEFT_CLENCH
+        elif range_right > range_left and range_right > params.right_clench_thres:
+            return StateBit.RIGHT_CLENCH
     return StateBit.NOTHING
 
 
@@ -65,6 +69,7 @@ def process_board_data(
     data: np.ndarray,
     baseline_data: np.ndarray,
     params: BCIParams,
+    last_bit: StateBit,
 ) -> BitEvent:
     """Process raw board data into bit event"""
     eeg_channels = BoardShim.get_eeg_channels(params.board_id)
@@ -76,12 +81,15 @@ def process_board_data(
     range_accel_nod = np.ptp(data[accel_channels[2]])
     range_accel_shake = np.ptp(data[accel_channels[0]])
 
+    print(range_left, range_right, range_accel_nod, range_accel_shake)
+
     bit = action_to_state(
         range_left,
         range_right,
         range_accel_nod,
         range_accel_shake,
         params,
+        last_bit,
     )
 
     return BitEvent(
@@ -104,6 +112,7 @@ def bci_session(params: BCIParams, flush_seconds: int = 4):
 
     # Flush initial noisy data
     for _ in range(flush_seconds):
+        time.sleep(1)
         board.get_board_data()
 
     try:

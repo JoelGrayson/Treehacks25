@@ -30,10 +30,20 @@ async def handle(
 
     elif bit == StateBit.NOD:
         # Accept current word, reset state
-        return "", None
+        return "", WordEvent(
+            bits=current_bits,
+            suggestions=[],
+            complete_word=None,
+        )
 
     elif bit == StateBit.SHAKE:
         # Backspace
-        return current_bits[:-1] if current_bits else "", None
+        return current_bits[:-1] if current_bits else "", WordEvent(
+            bits=current_bits,
+            suggestions=[],
+            complete_word=None,
+        )
 
-    return current_bits, None
+    return current_bits, WordEvent(
+        bits=current_bits, suggestions=[], complete_word=None
+    )

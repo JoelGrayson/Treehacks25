@@ -12,28 +12,24 @@ from dataclasses import asdict
 from tqdm import tqdm
 
 # Simulation settings
-SIMULATE = True  # Set to True to use pickle data instead of real device
+SIMULATE = False  # Set to True to use pickle data instead of real device
 
-params = BCIParams(
-    serial_port=settings.serial_port,
-    board_id=settings.board_id,
-    accel_pitch_thres=settings.accel_pitch_thres,
-    accel_roll_thres=settings.accel_roll_thres,
-    clench_thres=settings.clench_thres,
-)
+params = BCIParams()
 
 
-def loop_forever_bci(fetch_data, baseline, params, ws, delay=0.1):
+def loop_forever_bci(fetch_data, baseline, params, ws, delay):
     """Run BCI processing loop with configurable data source."""
     i = 0
-    pbar = tqdm(unit=" bits") if SIMULATE else None
+    pbar = tqdm(unit=" bits")
     last_check = time.time()
+    last_bit = StateBit.NOTHING
 
     while True:
         if time.time() - last_check < delay:
             continue
 
-        event_data = process_board_data(fetch_data(i), baseline, params)
+        event_data = process_board_data(fetch_data(i), baseline, params, last_bit)
+        last_bit = event_data.bit
         # print(event_data.raw_data)
         if event_data.bit != StateBit.NOTHING:
             ws.send(json.dumps({"event": "bit", "data": asdict(event_data)}))
@@ -66,6 +62,7 @@ try:
                 baseline=baseline_data,
                 params=params,
                 ws=ws,
+                delay=1,
             )
 finally:
     ws.abort()
