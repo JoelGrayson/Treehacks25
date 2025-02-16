@@ -24,9 +24,20 @@
         .chart-wrapper {
             border: 1px solid #ddd;
             border-radius: 5px;
-            height: 150px;
+            height: 118px;
             width: 100%;
             zoom: 0.6;
+        }
+        .bar-chart-container {
+            width: 100%;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            height: 160px;
+        }
+        .bar-chart-container>canvas {
+            height: 100%;
+            margin-inline: auto;
         }
     </style>
 </head>
@@ -60,14 +71,16 @@
         <div id='gap' class='bg-black w-[3px] h-screen'></div>
         
         <div id='right-pane' class='split'>
-            <h3 class='text-center font-bold'>EEG</h3>
             <div class="charts-container" id="chartsContainer"></div>
+            <div class="bar-chart-container">
+                <canvas id="myChart"></canvas>
+            </div>        
         </div>
     </div>
 
 
 
-    
+    <script src="barChart.js"></script>
 
     <script>
         // Initialize Split.js
@@ -104,6 +117,7 @@
         for (let i = 0; i < 16; i++) {
             const chartWrapper = document.createElement('div');
             chartWrapper.className = 'chart-wrapper';
+            chartWrapper.innerHTML=`<h3 class='text-center font-bold'>EEG ${i+1}</h3>`;
             
             const canvas = document.createElement('canvas');
             chartWrapper.appendChild(canvas);
@@ -168,7 +182,12 @@
         //         ${}
         //     `;
         // }
-        
+
+        barChart();
+
+
+
+        // Websocket
         const ws=new WebSocket('ws://127.0.0.1:5000/websocket');
         ws.onopen=()=>console.log('Connected to server');
         ws.onmessage=(event)=>{
