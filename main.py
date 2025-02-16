@@ -15,9 +15,8 @@ params.serial_port='/dev/cu.usbserial-DP05IK99'
 
 
 try:
-    print("PRE")
-    print("B", board_id)
     board = BoardShim(board_id, params)
+    print("PRE")
     board.prepare_session()
     print("Successfully connected")
     board.start_stream()
