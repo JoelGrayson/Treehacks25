@@ -55,17 +55,7 @@ try:
             print("1")
         else:
             print("baseline")'''
-
-
-
-        '''arr = []
-
-        for channel in eeg_channels:
-            print(channel)
-            arr.append(data[channel])'''
-       # print(f"Channel {channel}: {np.mean(data[channel])}")
-    #for channel in accel_channels:
-    #    arr.append(data[channel])
+        
     np.savetxt('data.csv', arr, delimiter=",")
     board.stop_stream()
     board.release_session()
@@ -73,7 +63,7 @@ except Exception as e:
     print("Problem", e)
 print("Prepared")
 
-SAMPLING_RATE=125 #print("Sampling rate", BoardShim.get_sampling_rate(board_id))
+'''SAMPLING_RATE=125 #print("Sampling rate", BoardShim.get_sampling_rate(board_id))
 
 # for i in range(30):
 while True:
@@ -104,5 +94,4 @@ while True:
 
 
 board.stop_stream()
-board.release_session()
-
+board.release_session()'''
