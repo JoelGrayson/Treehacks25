@@ -6,7 +6,6 @@ import time
 import numpy as np
 import json
 
-
 app=Flask(__name__, static_folder='web', static_url_path='/')
 
 @app.route('/')

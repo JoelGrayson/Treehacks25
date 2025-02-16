@@ -17,49 +17,68 @@
     </style>
 </head>
 <body>
-    <h3>EEG Data</h3>
-    <canvas id="myChart" width="400" height="200"></canvas>
+    <div class='flex w-full h-full'>
+        <div id='left-pane' class='w-[50%]'>
+            <div id='characters'>
+                <div>
+                    <div>H</div>
+                    <div>0001</div>
+                </div>
+                <div>
+                    <div>E</div>
+                    <div>0101</div>
+                </div>
+                <div>
+                    <div>L</div>
+                    <div>0111</div>
+                </div>
+                <div>
+                    <div>L</div>
+                    <div>0111</div>
+                </div>
+                <div>
+                    <div>O</div>
+                    <div>1000</div>
+                </div>
+            </div>
+        </div>
+        <div id='gap' class='bg-black w-[3px] h-screen'></div>
+        <div id='right-pane' class='w-[50%]'>
+            Charts
+        </div>
+    </div>
+
+
+
+
+
     <script>
-        const ctx=document.getElementById('myChart').getContext('2d');
-        const myChart=new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: ['L1', 'L2', 'L3', 'L4', 'L5', 'L6', 'L7', 'L8', 'R1', 'R2', 'R3', 'R4', 'R5', 'R6', 'R7', 'R8'],
-                datasets: [{
-                    label: 'EEG Data',
-                    data: Array(16).fill(0),
-                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                    borderColor: 'rgba(75, 192, 192, 1)',
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                scales: {
-                    y: {
-                        beginAtZero: true
-                    }
-                }
-            }
-        });
-
-        // function updateChart() {
-        //     myChart.data.datasets[0].data=Array.from({length: 16}, ()=>Math.floor(Math.random()*100));
-        //     myChart.update();
-        // }
-
-        // setInterval(updateChart, 1000);
-    
         // create a websocket to /websocket
-        const ws = new WebSocket('ws://127.0.0.1:5000/websocket');
-        ws.onopen = () => console.log('Connected to server');
-        ws.onmessage = (event) => {
-            const data=JSON.parse(event.data);
-            console.log(data);
-            if (data.type==='eeg') {
-                myChart.data.datasets[0].data=data.data; //update data
-                myChart.update();
-            }
-        };
+        const data=[];
+
+        // const cEl=document.getElementById('characters');
+        // function renderData() {
+        //     cEl.innerHTML=`
+        //         ${}
+        //     `;
+        // }
+        
+        // const ws=new WebSocket('ws://127.0.0.1:5000/websocket');
+        // ws.onopen=()=>console.log('Connected to server');
+        // ws.onmessage=(event)=>{
+        //     const got=JSON.parse(event.data);
+        //     console.log(got);
+        //     const { type, data }=got;
+        //     if (type==='audio') {
+        //         // TODO: play audio at URL data (passed in from Hume)
+        //     }
+        //     if (type==='char') {
+        //         // TODO: add character to the display
+        //     }
+        //     if (type==='byte') {
+        //         // TODO: add a byte
+        //     }
+        // };
     </script>
 </body>
 </html>
