@@ -18,14 +18,15 @@
 
         .charts-container {
             display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 20px;
-            padding: 20px;
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: repeat(8, 1fr);
         }
         .chart-wrapper {
             border: 1px solid #ddd;
-            padding: 10px;
             border-radius: 5px;
+            height: 150px;
+            width: 100%;
+            zoom: 0.6;
         }
     </style>
 </head>
@@ -59,7 +60,7 @@
         <div id='gap' class='bg-black w-[3px] h-screen'></div>
         
         <div id='right-pane' class='split'>
-            Charts
+            <h3 class='text-center font-bold'>EEG</h3>
             <div class="charts-container" id="chartsContainer"></div>
         </div>
     </div>
@@ -93,7 +94,8 @@
         }
 
         // Create labels for the x-axis (time points)
-        const labels = Array.from({length: 10}, (_, i) => `T${i + 1}`);
+        const labels = Array.from({length: 10}, (_, i) => ``);
+        // const labels = Array.from({length: 10}, (_, i) => `T${i + 1}`);
 
         // Create 16 charts
         const chartsContainer = document.getElementById('chartsContainer');
