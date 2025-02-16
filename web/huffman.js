@@ -13,24 +13,24 @@ function huffman() {
 
         // Function to draw a node
         function drawNode(x, y, label, isLeaf, char = '') {
-        const radius = 20;
-        ctx.beginPath();
-        ctx.arc(x, y, radius, 0, 2 * Math.PI);
-        // ctx.fillStyle = isLeaf ? '#4CAF50' : '#2196F3';
-        ctx.fill();
-        ctx.stroke();
+            const radius = 20;
+            ctx.beginPath();
+            ctx.arc(x, y, radius, 0, 2 * Math.PI);
+            // ctx.fillStyle = isLeaf ? '#4CAF50' : '#2196F3';
+            ctx.fill();
+            ctx.stroke();
 
-        ctx.fillStyle = 'white';
-        ctx.font = '12px Arial';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        
-        if (isLeaf) {
-            ctx.fillText(char, x, y - 6);
-            ctx.fillText(label, x, y + 6);
-        } else {
-            ctx.fillText(label, x, y);
-        }
+            ctx.fillStyle = 'white';
+            ctx.font = '12px Arial';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            
+            if (isLeaf) {
+                ctx.fillText(char, x, y - 6);
+                ctx.fillText(label, x, y + 6);
+            } else {
+                ctx.fillText(label, x, y);
+            }
         }
 
         // Function to draw a line

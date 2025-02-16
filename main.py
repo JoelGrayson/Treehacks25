@@ -9,7 +9,7 @@ from brainflow.board_shim import BoardShim, BoardIds
 import json
 import pickle
 from typing import Literal
-from dataclasses import dataclass
+from dataclasses import dataclass, asdict
 
 MODE: Literal['inference'] | Literal['collect'] | Literal['simulate'] = 'collect'
 
@@ -60,6 +60,9 @@ def run(ws):
     start = time.time()
     # https://brainflow.readthedocs.io/en/stable/UserAPI.html#python-api-reference
     with bci_session() as board:
+        time.sleep(1)
+        baseline_data=board.get_board_data()
+        
         bit = BrainBit.BASELINE
         i = 0
         data_to_pickle = []
@@ -108,5 +111,12 @@ def run(ws):
             elif range_right > range_left:
                 bit = BrainBit.RIGHT_CLENCH
 
-            ws.send(json.dumps({"type": "bit", "data": bit.value}))
+            print("sending", bit.value)
+            ws.send(json.dumps({"type": "bit", "data": {
+                "bit": bit.value,
+                "greeks": asdict(greeks),
+                # "data": (data.mean()-baseline_data.mean()).tolist()
+                "data": (np.mean(data, axis=1) - np.mean(baseline_data, axis=1)).tolist()  # Mean of each column
+            }}))
             print(f"{(time.time() - start):.2f}s: {bit.value} ({bit.name})")
+            
