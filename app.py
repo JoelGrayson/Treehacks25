@@ -6,20 +6,24 @@ import time
 import numpy as np
 import json
 
-app=Flask(__name__, static_folder='web', static_url_path='/')
 
-@app.route('/')
+app = Flask(__name__, static_folder="web", static_url_path="/")
+
+
+@app.route("/")
 def home():
-    return redirect('/index.html')
+    return redirect("/index.html")
 
-sock=Sock(app)
 
-@sock.route('/websocket')
-def route(ws): #sends { type: letter | eeg, data: {} | '' }
+sock = Sock(app)
+
+
+@sock.route("/websocket")
+def route(ws):  # sends { type: letter | eeg, data: {} | '' }
     # https://brainflow.readthedocs.io/en/stable/UserAPI.html#python-api-reference
-    board_id=BoardIds.CYTON_DAISY_BOARD.value #2 #CYTON_DAISY_BOARD
-    params=BrainFlowInputParams()
-    params.serial_port='/dev/cu.usbserial-DP05IK99'
+    board_id = BoardIds.CYTON_DAISY_BOARD.value  # 2 #CYTON_DAISY_BOARD
+    params = BrainFlowInputParams()
+    params.serial_port = "/dev/cu.usbserial-DP05IK99"
 
     board = BoardShim(board_id, params)
     print("PRE")
@@ -29,28 +33,28 @@ def route(ws): #sends { type: letter | eeg, data: {} | '' }
 
     eeg_channels = BoardShim.get_eeg_channels(board_id)
     accel_channels = BoardShim.get_accel_channels(board_id)
-    sampling_rate=board.get_sampling_rate(board_id)
+    sampling_rate = board.get_sampling_rate(board_id)
 
     for i in range(3):
         time.sleep(1)
-        data=board.get_board_data()
+        data = board.get_board_data()
     time.sleep(1)
-    baseline=board.get_board_data()
+    baseline = board.get_board_data()
     # print("Set baseline to", baseline, type(baseline))
 
-    while (True):
+    while True:
         time.sleep(1)
         data = board.get_board_data()
 
         arr_left = data[eeg_channels[1]]
-        
-        #mid = arr[int(0.25 * len(arr)):int(0.75 * len(arr))]
-        #range_mid = np.ptp(mid)
+
+        # mid = arr[int(0.25 * len(arr)):int(0.75 * len(arr))]
+        # range_mid = np.ptp(mid)
         range_left = np.ptp(arr_left)
 
         arr_right = data[eeg_channels[9]]
         range_right = np.ptp(arr_right)
-        
+
         if range_left < 200 and range_right < 200:
             print("baseline")
         elif range_left > range_right:
@@ -58,13 +62,15 @@ def route(ws): #sends { type: letter | eeg, data: {} | '' }
         elif range_right > range_left:
             print("1")
 
-        channelToData={}
+        channelToData = {}
         for eeg_channel in eeg_channels:
-            channelToData[eeg_channel]=np.mean(data[eeg_channel])-np.mean(baseline[eeg_channel])
+            channelToData[eeg_channel] = np.mean(data[eeg_channel]) - np.mean(
+                baseline[eeg_channel]
+            )
         print(channelToData)
-        ws.send(json.dumps({ 'type': 'eeg', 'data': channelToData }))
+        ws.send(json.dumps({"type": "eeg", "data": channelToData}))
 
-        '''
+        """
         accel = data[accel_channels[2]]
         range_accel = np.ptp(accel)
         if (range > 200):
@@ -72,12 +78,12 @@ def route(ws): #sends { type: letter | eeg, data: {} | '' }
         elif (range_accel > 0.14):
             print("1")
         else:
-            print("baseline")'''
-    
+            print("baseline")"""
+
     board.stop_stream()
     board.release_session()
 
-    '''SAMPLING_RATE=125 #print("Sampling rate", BoardShim.get_sampling_rate(board_id))
+    """SAMPLING_RATE=125 #print("Sampling rate", BoardShim.get_sampling_rate(board_id))
 
     # for i in range(30):
     while True:
@@ -108,4 +114,4 @@ def route(ws): #sends { type: letter | eeg, data: {} | '' }
 
 
     board.stop_stream()
-    board.release_session()'''
+    board.release_session()"""
