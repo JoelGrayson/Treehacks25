@@ -66,7 +66,8 @@ def process_board_data(
     range_accel_nod = np.ptp(data[accel_channels[2]])
     range_accel_shake = np.ptp(data[accel_channels[0]])
 
-    # print(range_left, range_right, range_accel_nod, range_accel_shake)
+    if not settings.SIMULATE:
+        print(range_left, range_right, range_accel_nod, range_accel_shake)
 
     bit = action_to_state(
         range_left,
