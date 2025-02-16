@@ -53,18 +53,10 @@
         const ws = new WebSocket('ws://127.0.0.1:5000/websocket');
         ws.onopen = () => console.log('Connected to server');
         ws.onmessage = (event) => {
-            const data = JSON.parse(event.data);
+            const data=JSON.parse(event.data);
             console.log(data);
-            if (data.type === 'eeg') {
-                const eegData = data.data;
-                const newData = [];
-                for (let i = 1; i <= 8; i++) {
-                    newData.push(eegData[i].reduce((a, b) => a + b, 0) / eegData[i].length);
-                }
-                for (let i = 9; i <= 16; i++) {
-                    newData.push(eegData[i].reduce((a, b) => a + b, 0) / eegData[i].length);
-                }
-                myChart.data.datasets[0].data = newData;
+            if (data.type==='eeg') {
+                myChart.data.datasets[0].data=data.data; //update data
                 myChart.update();
             }
         };

@@ -28,16 +28,16 @@ def route(ws): #sends { type: letter | eeg, data: {} | '' }
     print("Successfully connected")
     board.start_stream()
 
+    eeg_channels = BoardShim.get_eeg_channels(board_id)
+    accel_channels = BoardShim.get_accel_channels(board_id)
+    sampling_rate=board.get_sampling_rate(board_id)
+
     for i in range(3):
         time.sleep(1)
         data=board.get_board_data()
     time.sleep(1)
     baseline=board.get_board_data()
-    print("Set baseline to", baseline, type(baseline))
-    
-    eeg_channels = BoardShim.get_eeg_channels(board_id)
-    accel_channels = BoardShim.get_accel_channels(board_id)
-    sampling_rate=board.get_sampling_rate(board_id)
+    # print("Set baseline to", baseline, type(baseline))
 
     while (True):
         time.sleep(1)
@@ -61,11 +61,8 @@ def route(ws): #sends { type: letter | eeg, data: {} | '' }
 
         channelToData={}
         for eeg_channel in eeg_channels:
-            print(len(data[eeg_channel]), len(baseline[eeg_channel]))
-            if len(data[eeg_channel]) == len(baseline[eeg_channel]):
-                channelToData[eeg_channel]=list(data[eeg_channel]-baseline[eeg_channel])
-            else:
-                print(f"Skipping channel {eeg_channel} due to shape mismatch")
+            channelToData[eeg_channel]=np.mean(data[eeg_channel])-np.mean(baseline[eeg_channel])
+        print(channelToData)
         ws.send(json.dumps({ 'type': 'eeg', 'data': channelToData }))
 
         '''
