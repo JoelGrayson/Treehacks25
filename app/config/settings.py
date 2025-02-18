@@ -42,7 +42,7 @@ class Settings(BaseSettings):
     # For Joe Li over-ear BCI, 12am
     accel_pitch_thres: float = 0.14
     accel_roll_thres: float = 0.14
-    left_clench_thres: float = 400 if SIMULATE else 400
+    left_clench_thres: float = 300 if SIMULATE else 300
     right_clench_thres: float = 300 if SIMULATE else 300
 
     HOST: str = "0.0.0.0"

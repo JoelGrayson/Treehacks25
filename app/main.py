@@ -193,7 +193,13 @@ async def websocket_endpoint(websocket: WebSocket):
 async def run_server():
     """Run FastAPI server in the background."""
     print("start fastapi")
-    config = uvicorn.Config(app, host="0.0.0.0", port=settings.PORT, log_level="info")
+    config = uvicorn.Config(
+        app,
+        host="0.0.0.0",
+        port=settings.PORT,
+        log_level="info",
+        ws_ping_timeout=int(2e6),
+    )
     server = uvicorn.Server(config)
     await server.serve()
 
